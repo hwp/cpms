@@ -47,7 +47,9 @@ def main():
 
     # generate samples
     n = 400
+    # sample component
     comps = np.random.choice(3, n, p=weights)
+    # sample data given component
     samples = [np.random.multivariate_normal(means[c], cov) for c in comps]
     samples = np.array(samples)     # to numpy array
 
