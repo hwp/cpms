@@ -52,8 +52,8 @@ def main(train, test, fs):
     """
     # extract mfcc with 16 coefficents:
     # 17 coefficients with first (energy) removed
-    train_mfcc = [[mfcc(u, fs, 0.032, 0.01, 17, )[1:] for u in p] for p in train]
-    test_mfcc = [[mfcc(u, fs, 0.032, 0.01, 17)[1:] for u in p] for p in test]
+    train_mfcc = [[mfcc(u, fs, 0.032, 0.01, 17, )[:,1:] for u in p] for p in train]
+    test_mfcc = [[mfcc(u, fs, 0.032, 0.01, 17)[:,1:] for u in p] for p in test]
 
     # (c) k = 2
     acc_frame, acc_utter = experiment(train_mfcc, test_mfcc, 2)
@@ -78,8 +78,8 @@ def main(train, test, fs):
 
     # (e) plot accuracy vs # mfcc coef. = 4,8,12,16 (k = 3)
     for i in xrange(4):
-        train_mfcc = [[mfcc(u, fs, 0.032, 0.01, i * 4 + 5, )[1:] for u in p] for p in train]
-        test_mfcc = [[mfcc(u, fs, 0.032, 0.01, i * 4 + 5)[1:] for u in p] for p in test]
+        train_mfcc = [[mfcc(u, fs, 0.032, 0.01, i * 4 + 5, )[:,1:] for u in p] for p in train]
+        test_mfcc = [[mfcc(u, fs, 0.032, 0.01, i * 4 + 5)[:,1:] for u in p] for p in test]
         acc_frame, acc_utter = experiment(train_mfcc, test_mfcc, 3)
         afs[i], aus[i] = np.mean(acc_frame), np.mean(acc_utter)
     print '==== k = 3, [4,8,12,16] mfcc coef. ===='

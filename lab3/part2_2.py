@@ -14,7 +14,7 @@ from python_speech_features import mfcc
 from sklearn.mixture import GaussianMixture
 import matplotlib.pyplot as plt
 
-def experiment(train, test, ncomp):
+def experiment(train, test, ncomp, models=None, ncoef=None):
     """
     do experiment with given training and test sets using the specified
     number of components.
@@ -23,74 +23,136 @@ def experiment(train, test, ncomp):
     return accuracy at frame level (per person) and utterance level
     """
     # train one model for each person
-    models = [GaussianMixture(ncomp, covariance_type='diag', n_init=20) \
-                    .fit(np.concatenate(p)) for p in train]
+    if models is None:
+        models = [GaussianMixture(ncomp, covariance_type='diag',
+                                  n_init=10).fit(p) for p in train]
+
+    if ncoef is not None:
+        train = [p[:,:ncoef] for p in train]
+        test = [[u[:,:ncoef] for u in p] for p in test]
+        # TODO
 
     # for each model, predict (log) probability of each frame
     prob = [[np.concatenate([m.score_samples(u)[:,np.newaxis]
                 for m in models], axis=1) for u in p] for p in test]
 
-    # classify frame by frame
-    cls = [np.concatenate([np.argmax(u, axis=1) for u in p], axis=0) for p in prob]
-
-    # evaluate
-    acc_frame = [np.mean(p == i) for (i, p) in enumerate(cls)]
-
     # classify utterance by utterance
     cls = [np.argmax([np.sum(u, axis=0) for u in p], axis=1) for p in prob]
 
     # evaluate
-    acc_utter = [np.mean(p == i) for (i, p) in enumerate(cls)]
+    return [np.mean(p == i) for (i, p) in enumerate(cls)], models
 
-    return (acc_frame, acc_utter)
-
-
-def main(train, test, fs):
+def main(train_head, train_head_seg, test_head, test_head_seg, test_arr, test_arr_seg, fs):
     """
     main function
-    train, test: raw signal
+    train_head, train_head_seg: raw data and segmentation labels
+    test_head, test_head_seg: raw data and segmentation labels
+    test_arr, test_arr_seg: raw data and segmentation labels
     fs: sample rate
     """
     # extract mfcc with 16 coefficents:
     # 17 coefficients with first (energy) removed
-    train_mfcc = [[mfcc(u, fs, 0.032, 0.01, 17, )[1:] for u in p] for p in train]
-    test_mfcc = [[mfcc(u, fs, 0.032, 0.01, 17)[1:] for u in p] for p in test]
+    train_mfcc = [mfcc(u, fs, 0.032, 0.01, 21)[:,1:] for u in train_head]
 
-    # (c) k = 2
-    acc_frame, acc_utter = experiment(train_mfcc, test_mfcc, 2)
-    print '==== k = 2, 16 mfcc coef. ===='
-    print 'accuracy frame level per person: %s' % acc_frame
-    print 'accuracy utterance level per person: %s' % acc_utter
+    # filter with segmentation
+    train_mfcc = [t[train_head_seg[:len(t), i] == 1] for i, t in enumerate(train_mfcc)]
 
-    # (d) plot accuracy vs k = 1,2,3,4
-    afs = np.zeros(4)
-    aus = np.zeros(4)
-    afs[1], aus[1] = np.mean(acc_frame), np.mean(acc_utter)
-    acc_frame, acc_utter = experiment(train_mfcc, test_mfcc, 1)
-    afs[0], aus[0] = np.mean(acc_frame), np.mean(acc_utter)
-    acc_frame, acc_utter = experiment(train_mfcc, test_mfcc, 3)
-    afs[2], aus[2] = np.mean(acc_frame), np.mean(acc_utter)
-    acc_frame, acc_utter = experiment(train_mfcc, test_mfcc, 4)
-    afs[3], aus[3] = np.mean(acc_frame), np.mean(acc_utter)
+    # test head
+    test_mfcc = [mfcc(u, fs, 0.032, 0.01, 21)[:,1:] for u in test_head]
+    test_mfcc = [t[test_head_seg[:len(t), i] == 1] for i, t in enumerate(test_mfcc)]
 
-    print '==== k = [1,2,3,4], 16 mfcc coef. ===='
-    print 'avg acc frame level = %s' % afs
-    print 'avg acc utterance level = %s' % aus
+    # test array
+    arr_mfcc = mfcc(test_arr, fs, 0.032, 0.01, 21)[:,1:]
+    arr_mfcc = [arr_mfcc[test_head_seg[:len(arr_mfcc), i] == 1] for i in xrange(len(train_head))]
 
-    # (e) plot accuracy vs # mfcc coef. = 4,8,12,16 (k = 3)
-    for i in xrange(4):
-        train_mfcc = [[mfcc(u, fs, 0.032, 0.01, i * 4 + 5, )[1:] for u in p] for p in train]
-        test_mfcc = [[mfcc(u, fs, 0.032, 0.01, i * 4 + 5)[1:] for u in p] for p in test]
-        acc_frame, acc_utter = experiment(train_mfcc, test_mfcc, 3)
-        afs[i], aus[i] = np.mean(acc_frame), np.mean(acc_utter)
-    print '==== k = 3, [4,8,12,16] mfcc coef. ===='
-    print 'avg acc frame level = %s' % afs
-    print 'avg acc utterance level = %s' % aus
-    
+    # (a)
+    print '==== k=16, 20 mfcc coef. ===='
+
+    # frame level
+    acc, models = experiment(
+            train_mfcc, [np.array_split(p, len(p)) for p in test_mfcc], 16)
+    print 'head acc frame level = %s' % acc
+    acc, _ = experiment(
+            train_mfcc, [np.array_split(p, len(p)) for p in arr_mfcc], 16, models)
+    print 'array acc frame level = %s' % acc
+
+    # (20 frames) level
+    acc, _ = experiment(
+            train_mfcc, [np.array_split(p, len(p) / 20) for p in test_mfcc], 16, models)
+    print 'head acc 20-frame level = %s' % acc
+    acc, _ = experiment(
+            train_mfcc, [np.array_split(p, len(p) / 20) for p in arr_mfcc], 16, models)
+    print 'array acc 20-frame level = %s' % acc
+
+    # file level
+    acc, _ = experiment(
+            train_mfcc, [np.array_split(p, 1) for p in test_mfcc], 16, models)
+    print 'head acc file level = %s' % acc
+    acc, _ = experiment(
+            train_mfcc, [np.array_split(p, 1) for p in arr_mfcc], 16, models)
+    print 'array acc file level = %s' % acc
+
+    # (b)
+    # change # of components
+    print '==== k=1~16, 20 mfcc coef. ===='
+    acc_head = np.zeros(16)
+    acc_arr = np.zeros(16)
+    for k in xrange(1,17):
+        acc, models = experiment(
+                train_mfcc, [np.array_split(p, 1) for p in test_mfcc], k)
+        acc_head[k-1] = np.mean(acc)
+        acc, _ = experiment(
+                train_mfcc, [np.array_split(p, 1) for p in arr_mfcc], k, models)
+        acc_arr[k-1] = np.mean(acc)
+    print 'avg head acc file level = %s' % acc_head
+    print 'avg array acc file level = %s' % acc_arr
+
+    plt.figure(1)
+    plt.xlabel('Number of mixture components')
+    plt.ylabel('Average accuracy (file level)')
+    plt.ylim(0, 1)
+    plt.plot(np.arange(1,17), acc_head, label='head')
+    plt.plot(np.arange(1,17), acc_arr, label='array')
+    plt.legend(loc='lower right')
+    plt.show()
+
+    # (c)
+    # change # of mfcc coefficients
+    print '==== k=16, [4,8,12,16,20] mfcc coef. ===='
+    acc_head = np.zeros(5)
+    acc_arr = np.zeros(5)
+    for n in [4, 8, 12, 16, 20]:
+        acc, models = experiment(
+                train_mfcc, [np.array_split(p, 1) for p in test_mfcc], 16, ncoef=n)
+        acc_head[k-1] = np.mean(acc)
+        acc, _ = experiment(
+                train_mfcc, [np.array_split(p, 1) for p in arr_mfcc], 16, models, n)
+        acc_arr[k-1] = np.mean(acc)
+    print 'avg head acc file level = %s' % acc_head
+    print 'avg array acc file level = %s' % acc_arr
+
+    plt.figure(2)
+    plt.xlabel('Number of MFCC coefficients')
+    plt.ylabel('Average accuracy (file level)')
+    plt.ylim(0, 1)
+    plt.plot(np.arange(4, 21, 4), acc_head, label='head')
+    plt.plot(np.arange(4, 21, 4), acc_arr, label='array')
+    plt.legend(loc='lower right')
+    plt.show()
+
 if __name__ == '__main__':
     # load files
-    train = [[wav.read('data/DataSet1/train/s%d.wav' % i)[1]] for i in xrange(1, 9)]
-    test = [[wav.read('data/DataSet1/test/s%d.wav' % i)[1]] for i in xrange(1, 9)]
-    fs, _ = wav.read('data/DataSet1/train/s1.wav') # assume the rest are the same
-    main(train, test, fs)
+    train_head = [wav.read('data/DataSet2/AMItrainHead/H%d.wav' % i)[1]
+                    for i in xrange(1, 5)]
+    train_head_seg = np.loadtxt('data/DataSet2/AMItrainHead/SpeechSegmentation_train_100.txt',
+                                dtype=int)
+    test_head = [wav.read('data/DataSet2/AMItestHead/H%d.wav' % i)[1]
+                    for i in xrange(1, 5)]
+    test_head_seg = np.loadtxt('data/DataSet2/AMItestHead/SpeechSegmentation_test_100.txt',
+                               dtype=int)
+    fs, test_arr = wav.read('data/DataSet2/AMItestArray/Array.wav')
+    test_arr_seg = np.loadtxt('data/DataSet2/AMItestArray/SpeechSegmentation_test_100.txt',
+                              dtype=int)
+    fs, _ = wav.read('data/DataSet2/AMItrainHead/H1.wav') # assume the rest are the same
+    main(train_head, train_head_seg, test_head, test_head_seg, test_arr, test_arr_seg, fs)
 
