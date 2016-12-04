@@ -12,11 +12,11 @@ K = 3
 The fitted model with 3 components has the following parameters::
 
   weights = [ 0.27106915  0.37991589  0.34901496]
-  means = 
+  means =
   [[ 1.30897835  0.11929367]
    [ 1.69618826  2.03032176]
    [-0.17171217  0.51410805]]
-  covs = 
+  covs =
   [[[ 0.35693566  0.07843748]
     [ 0.07843748  0.76835218]]
 
@@ -40,10 +40,10 @@ K = 2
 The fitted model with 2 components has the following parameters::
 
   weights = [ 0.58302121  0.41697879]
-  means = 
+  means =
   [[ 0.48029514  0.29912586]
    [ 1.581088    1.93948237]]
-  covs = 
+  covs =
   [[[ 0.99481106  0.07355668]
     [ 0.07355668  1.07683421]]
 
@@ -56,12 +56,12 @@ K = 4
 The fitted model with 4 components has the following parameters::
 
   weights = [ 0.25647404  0.19857104  0.28308459  0.26187034]
-  means = 
+  means =
   [[ 1.37647623  0.20795541]
    [-0.31280652 -0.0844824 ]
    [ 0.28644038  1.31519666]
    [ 2.16633722  2.1928731 ]]
-  covs = 
+  covs =
   [[[ 0.30001452  0.06270939]
     [ 0.06270939  0.85948487]]
 
@@ -73,4 +73,80 @@ The fitted model with 4 components has the following parameters::
 
    [[ 0.65558056 -0.11548725]
     [-0.11548725  0.8383102 ]]]
+
+Part 2.1 Dataset1
+-----------------
+
+The code for this part is in file ``part2_1.py``.
+
+(a)
+^^^
+
+Estimate GMM model parameters for each speaker (*j*) using training set:
+
+.. math::
+
+  \theta^j
+
+The rule to identity speaker at frame level is:
+
+.. math::
+
+  arg\,max_{j}P(X|\theta^j)
+
+(b)
+^^^
+
+And, at utterance level is:
+
+.. math::
+
+  arg\,max_{j}\prod_{i}P(X_i|\theta^j) = arg\,max_{j}\sum_{i}\log P(X_i|\theta^j)
+
+(c)
+^^^
+
+Use 16 MFCC (first 17 coefficients except energy) calculated with frame size of 32ms and frame rate of 100fps as feature vector, initialize with K-means clustering, train GMM models with 2 components and diagonal covariance matrices. The accuracy at frame level and at utterance level for each person is listed as follows:
+
+============ ===== ===== ===== ===== ===== ===== ===== =====
+Person       0     1     2     3     4     5     6     7
+------------ ----- ----- ----- ----- ----- ----- ----- -----
+ACC (frame)  0.418 0.327 0.234 0.323 0.484 0.568 0.386 0.223
+ACC (utter.) 1.0   1.0   0.0   0.0   1.0   1.0   1.0   1.0
+============ ===== ===== ===== ===== ===== ===== ===== =====
+
+Note that each run of the experiment has different results. This is due the randomization of at the initialization step and also because the training and test set is small.
+
+(d)
+^^^
+
+Changing number of components from 1 to 4, the results is shown as follows:
+
+============ ===== ===== ===== =====
+K            1     2     3     4
+------------ ----- ----- ----- -----
+ACC (frame)  0.346 0.371 0.393 0.385
+ACC (utter.) 0.75  0.75  0.75  0.75
+============ ===== ===== ===== =====
+
+From the table we can see that at frame level when using 3 mixture components the performance is the best. And at utterance level, they all have 6 speakers correctly identified. Note that each run of the experiment has different results. Theoretically, models with low number of components fail to approximate the real distribution, while models with large number of components approximate the training data too close and may result in overfitting.
+
+(e)
+^^^
+
+Use 3 mixture components. Changing number of coefficients used to 4, 8, 12 and 16, the results are shown as follows:
+
+============ ===== ===== ===== =====
+# of coeff.  4     8     12    16
+------------ ----- ----- ----- -----
+ACC (frame)  0.217 0.287 0.298 0.367
+ACC (utter.) 0.25  0.375 0.875 0.75
+============ ===== ===== ===== =====
+
+The results show that the best when using 16 or 12 coefficients, the performance is the best at frame level or at utterance level. Fewer number of coefficients contains less information to characterize the speaker's voice. And the coefficients with large indices are the high frequency cepstrums that might contain noise.
+
+Part 2.2 Dataset2
+-----------------
+
+The code for this part is in file ``part2_2.py``.
 

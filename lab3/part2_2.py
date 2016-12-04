@@ -4,7 +4,7 @@
 """
   Copyright (c) 2016, Weipeng He <weipeng.he@idiap.ch>
 
-  Lab 3, Part 2, Task 1
+  Lab 3, Part 2, Task 2
 """
 
 import numpy as np
@@ -12,6 +12,7 @@ import scipy.io.wavfile as wav
 from python_speech_features import mfcc
 
 from sklearn.mixture import GaussianMixture
+import matplotlib.pyplot as plt
 
 def experiment(train, test, ncomp):
     """
