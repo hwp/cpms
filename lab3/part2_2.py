@@ -22,15 +22,15 @@ def experiment(train, test, ncomp, models=None, ncoef=None):
     i.e [[[mfcc per frame] per utterance] per person]
     return accuracy at frame level (per person) and utterance level
     """
+    # use first ncoef number of coefficients
+    if ncoef is not None:
+        train = [p[:,:ncoef] for p in train]
+        test = [[u[:,:ncoef] for u in p] for p in test]
+
     # train one model for each person
     if models is None:
         models = [GaussianMixture(ncomp, covariance_type='diag',
                                   n_init=10).fit(p) for p in train]
-
-    if ncoef is not None:
-        train = [p[:,:ncoef] for p in train]
-        test = [[u[:,:ncoef] for u in p] for p in test]
-        # TODO
 
     # for each model, predict (log) probability of each frame
     prob = [[np.concatenate([m.score_samples(u)[:,np.newaxis]
@@ -124,10 +124,10 @@ def main(train_head, train_head_seg, test_head, test_head_seg, test_arr, test_ar
     for n in [4, 8, 12, 16, 20]:
         acc, models = experiment(
                 train_mfcc, [np.array_split(p, 1) for p in test_mfcc], 16, ncoef=n)
-        acc_head[k-1] = np.mean(acc)
+        acc_head[n/4-1] = np.mean(acc)
         acc, _ = experiment(
                 train_mfcc, [np.array_split(p, 1) for p in arr_mfcc], 16, models, n)
-        acc_arr[k-1] = np.mean(acc)
+        acc_arr[n/4-1] = np.mean(acc)
     print 'avg head acc file level = %s' % acc_head
     print 'avg array acc file level = %s' % acc_arr
 

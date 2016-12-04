@@ -1,6 +1,8 @@
 CPMS, Homework 3
 ================
 
+-- *Weipeng He*
+
 Part 1
 ------
 
@@ -74,6 +76,10 @@ The fitted model with 4 components has the following parameters::
    [[ 0.65558056 -0.11548725]
     [-0.11548725  0.8383102 ]]]
 
+.. raw:: pdf
+
+   PageBreak
+
 Part 2.1 Dataset1
 -----------------
 
@@ -145,8 +151,69 @@ ACC (utter.) 0.25  0.375 0.875 0.75
 
 The results show that the best when using 16 or 12 coefficients, the performance is the best at frame level or at utterance level. Fewer number of coefficients contains less information to characterize the speaker's voice. And the coefficients with large indices are the high frequency cepstrums that might contain noise.
 
+.. raw:: pdf
+
+   PageBreak
+
 Part 2.2 Dataset2
 -----------------
 
 The code for this part is in file ``part2_2.py``.
+
+(a)
+^^^
+
+Use 20 MFCC (first 21 coefficients except energy) calculated with frame size of 32ms and frame rate of 100fps as feature vector, initialize with K-means clustering, train GMM models with 16 components and diagonal covariance matrices.
+
+The following table shows the accuracy at different levels for each person and for both head test set and array test set.
+
++----------+-----------------+-------+-------+-------+-------+
+| Test set | Person          | 1     | 2     | 3     | 4     |
++==========+=================+=======+=======+=======+=======+
+| Head     | ACC (frame)     | 0.566 | 0.682 | 0.363 | 0.527 |
+|          +-----------------+-------+-------+-------+-------+
+|          | ACC (20 frames) | 0.703 | 0.894 | 0.445 | 0.736 |
+|          +-----------------+-------+-------+-------+-------+
+|          | ACC (file)      | 1.0   | 1.0   | 1.0   | 1.0   |
++----------+-----------------+-------+-------+-------+-------+
+| Array    | ACC (frame)     | 0.421 | 0.487 | 0.188 | 0.358 |
+|          +-----------------+-------+-------+-------+-------+
+|          | ACC (20 frames) | 0.475 | 0.621 | 0.154 | 0.5   |
+|          +-----------------+-------+-------+-------+-------+
+|          | ACC (file)      | 1.0   | 1.0   | 0.0   | 1.0   |
++----------+-----------------+-------+-------+-------+-------+
+
+The result shows that the accuracy per every 20 frames or for the whole file are higher than the accuracy at frame level. It is because more frames contains more information and the effects of noises are reduced.
+
+(b)
+^^^
+
+The average accuracy (at file level) of using different number of mixture components is shown below:
+
+.. image:: acc_k.png
+   :name: acc vs. number of components.
+   :width: 70%
+
+It shows that models more mixture components have better ability to approximate the real distribution thus have better performance.
+
+(c)
+^^^
+
+The average accuracy (at file level) of using different number of MFCC coefficients is shown below:
+
+.. image:: acc_n.png
+   :name: acc vs. number of coefficients.
+   :width: 70%
+
+It shows that methods using more than 12 MFCC coefficients achieve the best results.
+
+(d)
+^^^
+
+Compared to the previous dataset, this dataset contains many more data. Therefore, it is possible to learn complex models (more mixture components) without overfitting.
+
+(e)
+^^^
+
+The headset recording is closer to the speakers' mouths, therefore the head test dataset is cleaner. Furthermore, the speaker models are trained on such dataset. So, the performance on the head test dataset is better than that on the array test dataset.
 
