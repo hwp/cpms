@@ -1,0 +1,98 @@
+Only in ..: 2014-STUDENT-VERSION
+Only in ..: 2016-STUDENT-VERSION
+Only in ..: 2016-ToCompleteForStudent.txt
+Only in ..: 2016-ToCompleteForStudent.txt~
+diff ./BoundingBox.m ../BoundingBox.m
+19c19,20
+< % TO COMPLETE
+---
+> hheight=hheight*scale;
+> hwidth=hwidth*scale;
+21a23,29
+> BBox.r1=min(nrow,max(1,floor(myrow-hheight)));
+> BBox.r2=max(1,min(nrow,floor(myrow+hheight))); 
+> 
+> BBox.c1=min(ncol,max(1,floor(mycol-hwidth)));
+> BBox.c2=max(1,min(ncol,floor(mycol+hwidth)));
+> 
+> Surface=(BBox.r2-BBox.r1)*(BBox.c2-BBox.c1);
+Only in .: BoundingBox.m~
+Only in ..: CLEAN_VERSION-2
+diff ./DisplayMeasurementSequence.m ../DisplayMeasurementSequence.m
+9c9
+< Title('Observations'); 
+---
+> title('Observations'); 
+Only in ..: GenerateData.m
+Only in ..: LikelihoodMap.m
+Only in .: mydif
+Only in ..: MyImHist.m
+Only in ..: ParticleFilter.m
+Only in ..: poub
+diff ./ProposalStep.m ../ProposalStep.m
+32a33,35
+>     new_speed=old_state(1,3:4)+Para.DynSigma*randn(1,2);
+>     new_state=old_state(1,1:2)+new_speed;
+>     new_state=[new_state,new_speed];
+34a38,41
+>     new_speed=old_state(1,3:4)+Para.DynSigma*randn(1,2);
+>     new_loc=old_state(1,1:2)+new_speed;
+>     new_scale=old_state(1,5)+Para.DynSigmaScale*randn(1,1);
+>     new_state=[new_loc,new_speed,new_scale];
+37c44,61
+< 
+---
+>     r=rand(1);
+>     if r>Para.ChangeDyn % so keep the same dyn
+>         new_motion=old_state(6);
+>     else
+>         if old_state(6)==1
+>             new_motion=0;
+>         else
+>             new_motion=1;
+>         end
+>     end
+>     if new_motion==0
+>         new_speed=Para.DynSigma*randn(1,2);
+>     else
+>         new_speed=old_state(1,3:4)+Para.DynSigma*randn(1,2);
+>     end        
+>     new_loc=old_state(1,1:2)+new_speed;
+>     new_scale=old_state(1,5)+Para.DynSigmaScale*randn(1,1);
+>     new_state=[new_loc,new_speed,new_scale,new_motion];
+Only in .: ProposalStep.m~
+diff ./ResampleStep.m ../ResampleStep.m
+16,18d15
+<     % TO COMPLETE
+<     % implementation of resampling step 
+<     % You can use the function sample_hist for that purpose
+20c17,24
+<     
+---
+>    % implementation of resampling step 
+>    for i=1:Para.Nsamples
+>    %  draw a particle index
+>       ind=sample_hist(ParticleSet.weights);
+>       NewSampleSet.weights(i)=1./Para.Nsamples; 
+>       NewSampleSet.states(i,:)=ParticleSet.states(ind,:);
+>    end
+> 
+Only in .: ResampleStep.m~
+Only in ..: SelectSequence.m
+Only in ..: SILEYE-LAB
+diff ./StateLikelihood.m ../StateLikelihood.m
+6,7d5
+< % TO COMPLETE
+< 
+12a11
+>    [B Surface]=BoundingBox(State(1),State(2),State(5),Para.Object.halfheight,Para.Object.halfwidth,ncol,nrow); 
+15a15
+>        Observed_histo=ColorHistogram(Data(B.r1:B.r2,B.c1:B.c2,:),Para.hist_bins_number);
+18c18
+< 
+---
+>        like=max(Para.Likemin,exp(-Para.lambdah*SquareBattacharya(Observed_histo,Para.Object.hist_model)));
+31d30
+< 
+Only in .: StateLikelihood.m~
+Only in ..: ToCompleteForStudent.txt
