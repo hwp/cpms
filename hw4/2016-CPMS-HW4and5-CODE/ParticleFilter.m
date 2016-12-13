@@ -3,7 +3,7 @@ clear all;
 close all;
 
 Para.exercise=0;
-Para.resampling=0;    % 0: No resampling of the particles - 1: Resampling
+Para.resampling=1;    % 0: No resampling of the particles - 1: Resampling
 Para.Display=1;
 
 Para.DisplayLikelihoodMap=0;
@@ -17,7 +17,8 @@ switch Para.exercise
    Para.InitState=[3 3];  % initial position
   case 1  % for x and for y position and speed (use same
           % initialization as case 0 for position
-          % TO COMPLETE
+   Para.statesize=4;
+   Para.InitState=[3 3 0 0];
 
   case 3  % for x (column) and for y (line) position and speed,
           % plus scale (last parameter)
@@ -36,13 +37,13 @@ switch Para.exercise
   case {0, 1}
    Para.DynSigma=1.0;    % noise in dynamics
    Para.Likemin=1e-20;   % minimum likelihood for a particle
-   Para.SigLike=4;       % variance of measurement noise in likelihood model
+   Para.SigLike=1.0;       % variance of measurement noise in likelihood model
    Para.inittime=1;      % first time step
    Para.endtime=40;      % las time step
    Para.Ntimes=Para.endtime;
    %   A=load('CleanData.mat');
-   A=load('NoiseData05.mat');
-   %   A=load('NoiseMultiple.mat');
+   % A=load('NoiseData05.mat');
+   A=load('NoiseMultiple.mat');
    Para.DataPts=A.DataPts;
    % display the trajectory of the measurements
    DisplayMeasurementSequence(Para);
@@ -108,9 +109,9 @@ switch Para.exercise
 
 end
 
-pause(1);
+pause(.5);
 
-Para.Nsamples=20;
+Para.Nsamples=50;
 Para.StateOutput=[];
 
 % definition of the particle set
@@ -163,7 +164,7 @@ for time=1:Para.Ntimes
     %[ParticleSet.weights ParticleSet.states]
 
     if Para.Display
-        pause(0.1)
+        pause(0.01)
     end
 end
 

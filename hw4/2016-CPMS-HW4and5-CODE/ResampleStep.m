@@ -13,12 +13,10 @@ NewSampleSet=ParticleSet;
 % when Para.resampling==0, new samples are just the old samples 
 %  (cf line above)
 if Para.resampling
-    % TO COMPLETE
     % implementation of resampling step 
     % You can use the function sample_hist for that purpose
-
-    
+    idx = sample_hist(ParticleSet.weights, Para.Nsamples);
+    NewSampleSet.states = ParticleSet.states(idx, :);
+    NewSampleSet.weights(:) = 1.0 / Para.Nsamples; 
 end
-
-
 

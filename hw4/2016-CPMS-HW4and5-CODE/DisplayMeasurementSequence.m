@@ -20,7 +20,7 @@ for time=1:FinalT
    % all other points are noise
    plot(z(2:end,1),z(2:end,2),'*r');
    
-   pause(0.1);
+   pause(0.01);
 end
 
 

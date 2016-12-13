@@ -30,6 +30,8 @@ switch  Para.exercise
     new_state=old_state+Para.DynSigma*randn(1,2);
 
   case 1
+    new_state(3:4) = old_state(3:4) + Para.DynSigma*randn(1,2);
+    new_state(1:2) = old_state(1:2) + new_state(3:4);
 
   case 3
 
