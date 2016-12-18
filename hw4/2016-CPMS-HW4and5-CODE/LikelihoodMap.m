@@ -4,7 +4,7 @@ function Image=LikelihoodMap(Data,Para,AverageScale)
 
 % Get only DataSample par line and column
 
-DataSample=130;
+DataSample= 40;
 
 [nrow ncol im_dim]=size(Data);
 

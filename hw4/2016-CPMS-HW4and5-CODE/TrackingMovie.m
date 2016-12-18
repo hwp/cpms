@@ -28,6 +28,7 @@ for t=1:nframes
     
     
 %    figure;image(uint8(tagged_image))
+    imwrite(uint8(tagged_image), sprintf('output/frame_%04d.png', t))
     tracking_movie(counter)=im2frame(uint8(tagged_image));
     
     counter=counter+1;

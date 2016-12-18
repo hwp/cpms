@@ -20,28 +20,13 @@ if size(p,2)>1
     p=p';
 end
 
+c = cumsum(p);
+c = c / c(end); % in case of floating point underflow 
+c(end) = 1.0;
 
-h = zeros(size(p));
-z = repmat(1,1,cols(p));
-n = repmat(n,1,cols(p));
-js = 1:cols(p);
-% loop bins
-for i = 1:(rows(p)-1)
-  % the count in bin i is a binomial distribution
-  for j = js
-    h(i,j) = randbinom(p(i,j)/z(j), n(j));
-  end
-  n = n - h(i,:);
-  z(js) = z(js) - p(i,js);
-  js = find(z > 0);
-end
-h(end,:) = n;
+h = zeros(n, 1);
 
-
-%% modif jmo
-indices=[];
-for i=1:rows(p)
-  indices=[indices;repmat([i],h(i),1)];
+for i = 1:n
+  h(i) = sum(rand > c) + 1;
 end
 
-h=indices;

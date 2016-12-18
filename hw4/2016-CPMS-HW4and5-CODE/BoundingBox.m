@@ -16,6 +16,13 @@ function [BBox Surface]=BoundingBox(mycol,myrow,scale,hheight,hwidth,ncol,nrow)
 
 % Apply transform
 
-% TO COMPLETE
+BBox.c1 = max(min(floor(mycol - hwidth * scale), ncol), 1);
+BBox.c2 = max(min(ceil(mycol + hwidth * scale), ncol), 1);
+BBox.r1 = max(min(floor(myrow - hheight * scale), nrow), 1);
+BBox.r2 = max(min(ceil(myrow + hheight * scale), nrow), 1);
+
+% assume surface means area
+Surface = (BBox.c2 - BBox.c1 + 1) * (BBox.r2 - BBox.r1 + 1);
+
 
 

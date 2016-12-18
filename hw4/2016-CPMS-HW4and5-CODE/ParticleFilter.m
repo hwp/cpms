@@ -2,7 +2,7 @@
 clear all;
 close all;
 
-Para.exercise=0;
+Para.exercise=4;
 Para.resampling=1;    % 0: No resampling of the particles - 1: Resampling
 Para.Display=1;
 
@@ -30,7 +30,8 @@ switch Para.exercise
   case 4 % case 3, but with an additional parameter, indicating the
          % type of dynamics (0 = previous position + noise; 1 =
          % using the speed information)
-
+    Para.statesize = 6;
+    Para.InitState = [0 0 0 0 1 0]; % this will be overriden
 end
 
 switch Para.exercise
@@ -59,19 +60,19 @@ switch Para.exercise
    set(gcf,'Position',[p(1),p(2)-p(4),p(3),p(4)]);
 
   case {3,4}
-   Para.DynSigma=2.;     % noise in dynamics (for location>/spee)
+   Para.DynSigma=4;     % noise in dynamics (for location>/spee)
    Para.ChangeDyn=0.2;  % proba of changing dynamics (ct location =0
                         % or ct speed = 1), for case 4
-   Para.DynSigmaScale=0.01; % noise in dynamics (for scale)
+   Para.DynSigmaScale=0.1; % noise in dynamics (for scale)
    Para.Likemin=1e-30;  % minimum likelihood for a particle
    Para.lambdah=20;    % coefficient of Bhattacharyya distance
 
    Para.DisplayParticles=1;          % Display all particles in the image
-   Para.DisplayLikelihoodMap=1;      % show likelihood map (for every position)
+   Para.DisplayLikelihoodMap=0;      % show likelihood map (for every position)
    Para.DisplayLikelihoodMapStep=20;  % As this is expensive, only
                                      % compute every x steps
 
-   Seq=2;
+   Seq=9;
    Para=SelectSequence(Para,Seq);
 
    [Para.ImageList,Para.TimeInstants]=GetFileList(Para.seqbasename,Para.ndigits,Para.extension,Para.inittime,Para.endtime,Para.timestep);
@@ -123,6 +124,7 @@ ParticleSet.weights=zeros(Para.Nsamples,1);
 ParticleSet=InitializeParticleSet(ParticleSet,Para);
 
 %
+Para.Ntimes
 for time=1:Para.Ntimes
     time
 
@@ -173,5 +175,5 @@ switch Para.exercise
   case {3,4}
   % Generate Ouput Movie
   tracking_movie=TrackingMovie(Para.ImageList,Para.StateOutput,Para);
-  movieview(tracking_movie);
+  %movieview(tracking_movie);
 end

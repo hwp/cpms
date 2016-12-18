@@ -36,6 +36,24 @@ switch  Para.exercise
   case 3
 
   case 4
+    if Para.ChangeDyn > rand
+      a = 1 - old_state(6);
+    else
+      a = old_state(6);
+    end
 
+    if a == 0
+      u = 0;
+      v = 0;
+      x = old_state(1) + Para.DynSigma * randn;
+      y = old_state(2) + Para.DynSigma * randn;
+    else
+      u = old_state(3) + Para.DynSigma * randn;
+      v = old_state(4) + Para.DynSigma * randn;
+      x = old_state(1) + u;
+      y = old_state(2) + v;
+    end
 
+    s = old_state(5) + Para.DynSigmaScale * randn;
+    new_state = [x y u v s a];
 end
